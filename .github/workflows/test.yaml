@@ -1,0 +1,63 @@
+name: Test
+
+on: workflow_dispatch
+jobs:
+  repo2docker:
+    name: >-
+      ${{ (matrix.env && 'env') || 'noenv' }} |
+      ${{ matrix.first_login }} |
+      ${{ (matrix.binderdocker_logout && 'logout') || 'nologout' }} |
+      ${{ (matrix.second_login && 'login') || 'nologin' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - DOCKER_CONFIG: $HOME/.docker
+          - {}
+        first_login:
+          - login-action
+          - binderdocker
+          - both
+        binderdocker_logout: [ true, false ]
+        second_login: [ true, false ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    env: ${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        if: matrix.first_login != 'binderdocker'
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Deploy
+        id: docker
+        uses: RepoDynamics/BinderDocker@main
+        with:
+          docker_registry: ${{ (matrix.first_login != 'login-action' && 'ghcr.io') || '' }}
+          docker_username: ${{ (matrix.first_login != 'login-action' && github.repository_owner) || '' }}
+          docker_password: ${{ (matrix.first_login != 'login-action' && secrets.GITHUB_TOKEN) || '' }}
+          image_name: ghcr.io/aariam/docker-test
+          image_tags: latest
+          git_ref: ${{ github.ref }}
+          cache_image_tags: latest
+          push: True
+          verify_public: ${{ (matrix.binderdocker_logout && 'warning') || 'false' }}
+      - uses: docker/login-action@v3
+        if: matrix.second_login
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/aariam/docker-test
+          subject-digest: ${{ steps.docker.outputs.image_digest }}
+          push-to-registry: 'true'
+          show-summary: 'true'

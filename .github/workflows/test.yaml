@@ -55,20 +55,16 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Attestation
+        id: attest
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/aariam/docker-test
           subject-digest: ${{ steps.docker.outputs.image_digest }}
           push-to-registry: 'true'
           show-summary: 'false'
-  create-summary:
-    runs-on: ubuntu-latest
-    if: always()
-    needs: repo2docker
-    env:
-      results: ${{ needs.repo2docker.result }}
-    steps:
-      - shell: python
+      - name: Summary
+        if: always()
+        env:
+          RESULT: ${{ (steps.attest.outcome == 'failure' && '❌') || '✅' }}
         run: |
-          import os
-          print(os.environ["results"])
+          echo "${RESULT}" >> $GITHUB_STEP_SUMMARY

@@ -69,7 +69,7 @@ jobs:
       - name: Summary
         if: always()
         env:
-          job_steps: ${{ steps }}
+          job_steps: ${{ toJSON(steps) }}
         shell: python
         run: |
           import os

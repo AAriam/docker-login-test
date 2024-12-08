@@ -1,4 +1,4 @@
-name: 'GitHub Container Build and Release'
+name: Push & Attest (with login-action)
 
 on: workflow_dispatch
 jobs:

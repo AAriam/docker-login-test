@@ -8,15 +8,22 @@ jobs:
     env:
       DOCKER_CONFIG: $HOME/.docker
     steps:
-      -
-        name: Login to Registry
+      
+      - run: cat $HOME/.docker/config.json
+      - uses: docker://docker
+        with:
+          entrypoint: docker
+          args: info
+      
+      - name: Login to Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        uses: docker://docker
+      
+      - run: cat $HOME/.docker/config.json
+      - uses: docker://docker
         with:
           entrypoint: docker
           args: info

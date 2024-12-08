@@ -4,7 +4,7 @@ on: workflow_dispatch
 jobs:
   repo2docker:
     name: >-
-      ${{ (matrix.env && 'env') || 'noenv' }} |
+      ${{ (matrix.env.DOCKER_CONFIG && 'env') || 'noenv' }} |
       ${{ matrix.first_login }} |
       ${{ (matrix.binderdocker_logout && 'logout') || 'nologout' }} |
       ${{ (matrix.second_login && 'login') || 'nologin' }}

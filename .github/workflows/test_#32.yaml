@@ -1,4 +1,4 @@
-name: test
+name: Test docker/login-actions/issues/32
 
 on: workflow_dispatch
 

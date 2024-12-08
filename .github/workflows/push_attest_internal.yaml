@@ -9,6 +9,8 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+    env:
+      DOCKER_CONFIG: $HOME/.docker
     steps:
       - uses: actions/checkout@v4
       - name: Build and Deploy

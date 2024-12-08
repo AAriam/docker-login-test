@@ -30,13 +30,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/login-action@v3
+        id: login-action-before
         if: matrix.first_login != 'binderdocker'
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Deploy
-        id: docker
+        id: binder-docker
         uses: RepoDynamics/BinderDocker@main
         with:
           docker_registry: ${{ (matrix.first_login != 'login-action' && 'ghcr.io') || '' }}
@@ -49,22 +50,36 @@ jobs:
           push: True
           verify_public: ${{ (matrix.binderdocker_logout && 'warning') || 'false' }}
       - uses: docker/login-action@v3
+        id: login-action-after
         if: matrix.second_login
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Attestation
-        id: attest
+        id: attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/aariam/docker-test
-          subject-digest: ${{ steps.docker.outputs.image_digest }}
+          subject-digest: ${{ steps.binder-docker.outputs.image_digest }}
           push-to-registry: 'true'
           show-summary: 'false'
       - name: Summary
         if: always()
         env:
-          RESULT: ${{ (steps.attest.outcome == 'failure' && '❌') || '✅' }}
+          job_steps: ${{ steps }}
+        shell: python
         run: |
-          echo "${RESULT}" >> $GITHUB_STEP_SUMMARY
+          import os
+          import json
+          
+          step_summary = os.environ["GITHUB_STEP_SUMMARY"]
+          steps = json.loads(os.environ["job_steps"])
+          all_passed = True
+          with open(step_summary, "a") as f:
+            for step_id, step in steps.items():
+              if step["outcome"] == "failure":
+                print(f'❌ {step_id}', file=f)
+                all_passed = False
+            if all_passed:
+              print('✅', file=f)

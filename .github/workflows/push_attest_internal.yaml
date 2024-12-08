@@ -11,11 +11,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - run: cat $HOME/.docker/config.json
-      - uses: docker://docker
-        with:
-          entrypoint: docker
-          args: info
       - name: Build and Deploy
         id: docker
         uses: RepoDynamics/BinderDocker@main
@@ -28,11 +23,6 @@ jobs:
           git_ref: ${{ github.ref }}
           cache_image_tags: latest
           push: True
-      - run: cat $HOME/.docker/config.json
-      - uses: docker://docker
-        with:
-          entrypoint: docker
-          args: info
       - name: Attestation
         uses: actions/attest-build-provenance@v2
         with:

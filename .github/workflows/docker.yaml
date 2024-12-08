@@ -13,12 +13,6 @@ jobs:
       DOCKER_CONFIG: $HOME/.docker
     steps:
       - uses: actions/checkout@v4
-      - name: SHA Check
-        id: sha
-        run: |
-          SHA=$(git rev-parse HEAD)
-          echo "Full Commit SHA: $SHA"
-          echo "sha=$SHA" >> $GITHUB_OUTPUT
       - run: cat $HOME/.docker/config.json
       - uses: docker://docker
         with:
@@ -29,7 +23,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          logout: 'false'
       - run: cat $HOME/.docker/config.json
       - uses: docker://docker
         with:
@@ -41,7 +34,6 @@ jobs:
         with:
           image_name: ghcr.io/aariam/docker-test
           image_tags: latest
-          git_path: repo
           git_ref: ${{ github.ref }}
           cache_image_tags: latest
           push: True

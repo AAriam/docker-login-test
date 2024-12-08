@@ -1,0 +1,27 @@
+name: Test2 docker/login-actions/issues/32
+
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CONFIG: $HOME/.docker
+    steps:
+      
+      - run: cat $HOME/.docker/config.json
+      - uses: docker://docker
+        with:
+          entrypoint: docker
+          args: info
+      
+      - uses: docker://docker
+        with:
+          entrypoint: docker
+          args: login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+      
+      - run: cat $HOME/.docker/config.json
+      - uses: docker://docker
+        with:
+          entrypoint: docker
+          args: info

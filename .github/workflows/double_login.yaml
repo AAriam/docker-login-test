@@ -13,6 +13,11 @@ jobs:
       DOCKER_CONFIG: $HOME/.docker
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and Deploy
         id: docker
         uses: RepoDynamics/BinderDocker@main

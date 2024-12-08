@@ -4,10 +4,12 @@ on: workflow_dispatch
 jobs:
   repo2docker:
     name: >-
-      ${{ (matrix.env.DOCKER_CONFIG && 'env') || 'noenv' }} |
+      (
+      ${{ (matrix.env.DOCKER_CONFIG && 'env') || 'no-env' }} |
       ${{ matrix.first_login }} |
-      ${{ (matrix.binderdocker_logout && 'logout') || 'nologout' }} |
-      ${{ (matrix.second_login && 'login') || 'nologin' }}
+      ${{ (matrix.binderdocker_logout && 'logout') || 'no-logout' }} |
+      ${{ (matrix.second_login && 'login') || 'no-login' }}
+      )
     strategy:
       fail-fast: false
       matrix:

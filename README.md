@@ -1,2 +1,3 @@
 # docker-login-test
-Testing an issue
+
+See https://github.com/docker/login-action/issues/822

@@ -63,6 +63,7 @@ jobs:
           show-summary: 'false'
   create-summary:
     runs-on: ubuntu-latest
+    if: always()
     needs: repo2docker
     env:
       results: ${{ needs.repo2docker.result }}
